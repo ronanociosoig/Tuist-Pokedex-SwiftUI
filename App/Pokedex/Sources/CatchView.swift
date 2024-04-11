@@ -14,6 +14,13 @@ extension AlertState where Action == CatchViewModel.AlertErrorAction {
                                          buttons: [
                                             .default(TextState(Constants.Translations.ok))
                                          ])
+    static func networkError(message: String) -> AlertState {
+        AlertState(title: TextState("Network Error"),
+                   message: TextState(message),
+                   buttons: [
+                    .default(TextState(Constants.Translations.ok))
+                   ])
+    }
 }
 
 final class CatchViewModel: ObservableObject, Notifier {
@@ -26,6 +33,7 @@ final class CatchViewModel: ObservableObject, Notifier {
     let searchService: SearchService
     
     var onCatchCompleted: () -> Void = unimplemented("CatchViewModel.onCatchCompleted")
+    var onCatchDismissed: () -> Void = unimplemented("CatchViewModel.onCatchDismissed")
     
     init(searchService: SearchService,
          dataProvider: CatchDataProviding,
@@ -34,17 +42,22 @@ final class CatchViewModel: ObservableObject, Notifier {
         self.destination = destination
         self.searchService = searchService
         self.dataProvider = dataProvider
+        self.blockCall = blockCall
     }
     
     func cancelButtonTapped() {
         os_log("Cancel button tapped", log: Log.general, type: .default)
-        self.onCatchCompleted()
+        self.onCatchDismissed()
     }
     
     func catchButtonTapped() {
         os_log("Catch button tapped", log: Log.general, type: .default)
         dataProvider.catchPokemon()
         self.onCatchCompleted()
+    }
+    
+    func catchErrorButtonTapped() {
+        self.onCatchDismissed()
     }
     
     enum Destination {
@@ -61,10 +74,15 @@ final class CatchViewModel: ObservableObject, Notifier {
     
     enum AlertErrorAction {
         case ok
+        case networkError(message: String)
     }
     
-    func showErrorAlert() {
-        self.destination = .showErrorAlert(.confirmError)
+    func showErrorAlert(message: String?) {
+        if let message = message {
+            self.destination = .showErrorAlert(.networkError(message: message))
+        } else {
+            self.destination = .showErrorAlert(.confirmError)
+        }
     }
     
     func showAlertForCatching() {
@@ -118,11 +136,15 @@ final class CatchViewModel: ObservableObject, Notifier {
         DispatchQueue.main.async {
             os_log("Data received", log: Log.data, type: .default)
             
-            // let errorMessage = errorMessage ?? "404"
-            
-            if let errorMessage = errorMessage, errorMessage.isEmpty {
-                os_log("Data error", log: Log.data, type: .default)
-                self.showErrorAlert()
+            if let errorMessage = errorMessage {
+                if errorMessage.isEmpty {
+                    os_log("Data error", log: Log.data, type: .default)
+                    self.showErrorAlert(message: nil)
+                } else {
+                    os_log("Network error", log: Log.data, type: .default)
+                    self.showErrorAlert(message: errorMessage)
+                }
+                
             } else {
                 self.pokemon = self.dataProvider.pokemon()
                 self.showAlertForCatching()
@@ -166,7 +188,7 @@ struct CatchView: View {
                         Text(model.pokemonWeightString())
                         Spacer()
                     }
-                
+                    
                     Spacer()
                 }
                 VStack {
@@ -200,8 +222,8 @@ struct CatchView: View {
         .alert(
             unwrapping: self.$model.destination,
             case: /CatchViewModel.Destination.showErrorAlert
-        ) { message in
-            
+        ) { _ in
+            self.model.catchErrorButtonTapped()
         }
     }
 }

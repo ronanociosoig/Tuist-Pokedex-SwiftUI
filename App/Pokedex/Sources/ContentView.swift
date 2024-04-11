@@ -38,6 +38,11 @@ final class ContentViewModel: ObservableObject {
         case let .catchScene(catchViewModel):
             catchViewModel.onCatchCompleted = { [weak self] in
                 guard let self else { return }
+                // TODO: save data
+                self.destination = nil
+            }
+            catchViewModel.onCatchDismissed = { [weak self] in
+                guard let self else { return }
                 self.destination = nil
             }
             break

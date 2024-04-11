@@ -1,11 +1,3 @@
-//
-//  DetailView.swift
-//  Pokedex
-//
-//  Created by ronan.ociosoig on 17/09/2023.
-//  Copyright © 2023 Sonomos.com. All rights reserved.
-//
-
 import SwiftUI
 import Common
 

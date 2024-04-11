@@ -1,7 +1,6 @@
 import ProjectDescription
 
 let reverseOrganizationName = "com.sonomos"
-
 let featuresPath = "Features"
 let corePath = "Core"
 let appPath = "App"
@@ -86,6 +85,7 @@ extension Project {
                            platform: Platform,
                            externalDependencies: [String],
                            targetDependancies: [TargetDependency],
+                           testingDependancies: [TargetDependency],
                            moduleTargets: [Module],
                            testingTargets: Set<AppTestingTargets> = Set([.unitTests]),
                            additionalFiles: [FileElement]) -> Project {
@@ -136,7 +136,7 @@ extension Project {
     }
     
     public static func makeAppInfoPlist() -> InfoPlist {
-        let infoPlist: [String: InfoPlist.Value] = [
+        let infoPlist: [String: Plist.Value] = [
             "CFBundleShortVersionString": "1.0",
             "CFBundleVersion": "1",
             "UIMainStoryboardFile": "",
