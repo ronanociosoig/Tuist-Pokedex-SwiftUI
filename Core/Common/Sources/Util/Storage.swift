@@ -13,22 +13,22 @@ public enum Directory {
     case caches
 }
 
-public protocol Storable {
-    func fileExists(fileName: String, in directory: Directory) -> Bool
-    func save<T: Encodable>(_ object: T, to directory: Directory, as fileName: String)
-    func load<T: Decodable>(_ fileName: String, from directory: Directory, as type: T.Type) -> T?
-    func remove(_ fileName: String, from directory: Directory)
+public protocol Storing {
+    static func fileExists(fileName: String, in directory: Directory) -> Bool
+    static func save<T: Encodable>(_ object: T, to directory: Directory, as fileName: String)
+    static func load<T: Decodable>(_ fileName: String, from directory: Directory, as type: T.Type) -> T?
+    static func remove(_ fileName: String, from directory: Directory)
 }
 
-public class Storage: Storable {
+public struct Storage: Storing {
     public init() {
         
     }
-    public func save<T>(_ object: T, to directory: Directory, as fileName: String) where T: Encodable {
+    public static func save<T>(_ object: T, to directory: Directory, as fileName: String) where T: Encodable {
         FileStorage.store(object, to: directoryAdaptor(directory: directory), as: fileName)
     }
     
-    public func load<T>(_ fileName: String, from directory: Directory, as type: T.Type) -> T? where T: Decodable {
+    public static func load<T>(_ fileName: String, from directory: Directory, as type: T.Type) -> T? where T: Decodable {
         if fileExists(fileName: fileName, in: directory) {
             return FileStorage.retrieve(fileName, from: directoryAdaptor(directory: directory), as: T.self)
         }
@@ -36,15 +36,15 @@ public class Storage: Storable {
         return nil
     }
     
-    public func fileExists(fileName: String, in directory: Directory) -> Bool {
+    public static func fileExists(fileName: String, in directory: Directory) -> Bool {
         return FileStorage.fileExists(fileName, in: directoryAdaptor(directory: directory))
     }
     
-    public func remove(_ fileName: String, from directory: Directory) {
+    public static func remove(_ fileName: String, from directory: Directory) {
         FileStorage.remove(fileName, from: directoryAdaptor(directory: directory))
     }
     
-    private func directoryAdaptor(directory: Directory) -> FileStorage.Directory {
+    private static func directoryAdaptor(directory: Directory) -> FileStorage.Directory {
         switch directory {
         case Directory.documents:
             return FileStorage.Directory.documents

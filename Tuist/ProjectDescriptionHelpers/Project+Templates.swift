@@ -30,7 +30,7 @@ public enum AppModuleType {
     case core
     case feature
     case app
-
+    
     func path() -> String {
         switch self {
         case .core:
@@ -117,22 +117,22 @@ extension Project {
             codeCoverageEnabled: true,
             testingOptions: []
         )
-
-      let options = Project.Options.options(automaticSchemesOptions: automaticSchemesOptions,
+        
+        let options = Project.Options.options(automaticSchemesOptions: automaticSchemesOptions,
                                               developmentRegion: nil,
                                               disableBundleAccessors: false,
                                               disableShowEnvironmentVarsInScriptPhases: false,
                                               disableSynthesizedResourceAccessors: false,
                                               textSettings: Options.TextSettings.textSettings(),
                                               xcodeProjectName: nil)
-
+        
         
         return Project(name: name,
                        organizationName: organizationName,
                        options: options,
                        targets: targets,
                        schemes: [],
-        additionalFiles: additionalFiles)
+                       additionalFiles: additionalFiles)
     }
     
     public static func makeAppInfoPlist() -> InfoPlist {
@@ -148,18 +148,18 @@ extension Project {
     
     /// Helper function to create a framework target and an associated unit test target and example app
     public static func makeFrameworkTargets(module: Module, platform: Platform) -> [Target] {
-        let frameworkPath = "\(module.moduleType.path())/\(module.path)"
+        let frameworkPath = "\(module.moduleType.path())/\(module.path)/"
         
         let frameworkResourceFilePaths = module.frameworkResources.map {
-            ResourceFileElement.glob(pattern: Path("\(module.moduleType.path())/\(module.path)/" + $0), tags: [])
+            ResourceFileElement.glob(pattern: Path(stringLiteral: frameworkPath + $0))
         }
         
         let exampleResourceFilePaths = module.exampleResources.map {
-            ResourceFileElement.glob(pattern: Path("\(module.moduleType.path())/\(module.path)/\(examplePath)/" + $0), tags: [])
+            ResourceFileElement.glob(pattern: Path(stringLiteral: "\(frameworkPath)\(examplePath)/" + $0))
         }
         
         let testResourceFilePaths = module.testResources.map {
-            ResourceFileElement.glob(pattern: Path("\(module.moduleType.path())/\(module.path)/Tests/" + $0), tags: [])
+            ResourceFileElement.glob(pattern: Path(stringLiteral: "\(frameworkPath)Tests/" + $0))
         }
         
         var exampleAppDependancies = module.exampleDependencies
@@ -172,63 +172,69 @@ extension Project {
         let exampleAppName = "\(module.name)\(exampleAppSuffix)"
         
         if module.targets.contains(.framework) {
-            let headers = Headers.headers(public: ["\(frameworkPath)/Sources/**/*.h"])
+            let headers = Headers.headers(public: ["\(frameworkPath)Sources/**/*.h"])
+            let path = Path(stringLiteral: "\(frameworkPath)Resources/**")
+            let element = ResourceFileElement.glob(pattern: path, tags: [])
+            var frameworkResources = ResourceFileElements(arrayLiteral: element)
+            frameworkResources.resources = frameworkResourceFilePaths
             
-            targets.append(Target(name: module.name,
-                                  platform: platform,
-                                  product: .framework,
-                                  bundleId: "\(reverseOrganizationName).\(module.name)",
-                                  infoPlist: .default,
-                                  sources: ["\(frameworkPath)/Sources/**"],
-                                  resources: ResourceFileElements(resources: frameworkResourceFilePaths),
-                                  headers: headers,
-                                  dependencies: module.frameworkDependancies))
+            targets.append(
+                Target.target(name: module.name,
+                              destinations: .iOS,
+                              product: .framework,
+                              bundleId: "\(reverseOrganizationName).\(module.name)",
+                              infoPlist: .default,
+                              sources: ["\(frameworkPath)Sources/**"],
+                              resources: frameworkResources,
+                              headers: headers,
+                              dependencies: module.frameworkDependancies))
         }
-
+        
         if module.targets.contains(.unitTests) {
-            targets.append(Target(name: "\(module.name)Tests",
-                                  platform: platform,
-                                  product: .unitTests,
-                                  bundleId: "\(reverseOrganizationName).\(module.name)Tests",
-                                  infoPlist: .default,
-                                  sources: ["\(frameworkPath)/Tests/**"],
-                                  resources: ResourceFileElements(resources: testResourceFilePaths),
-                                  dependencies: [.target(name: module.name)]))
+            
+            targets.append(Target.target(name: "\(module.name)Tests",
+                                         destinations: .iOS,
+                                         product: .unitTests,
+                                         bundleId: "\(reverseOrganizationName).\(module.name)Tests",
+                                         infoPlist: .default,
+                                         sources: ["\(frameworkPath)Tests/**"],
+                                         resources: ResourceFileElements(arrayLiteral: testResourceFilePaths.first!),
+                                         dependencies: [.target(name: module.name)]))
         }
-
+        
         if module.targets.contains(.exampleApp) {
-            targets.append(Target(name: exampleAppName,
-                                  platform: platform,
-                                  product: .app,
-                                  bundleId: "\(reverseOrganizationName).\(module.name)\(exampleAppSuffix)",
-                                  infoPlist: makeAppInfoPlist(),
-                                  sources: ["\(exampleSourcesPath)/**"],
-                                  resources: ResourceFileElements(resources: exampleResourceFilePaths),
-                                  dependencies: exampleAppDependancies))
+            targets.append(Target.target(name: exampleAppName,
+                                         destinations: .iOS,
+                                         product: .app,
+                                         bundleId: "\(reverseOrganizationName).\(module.name)\(exampleAppSuffix)",
+                                         infoPlist: makeAppInfoPlist(),
+                                         sources: ["\(exampleSourcesPath)/**"],
+                                         resources: ResourceFileElements(arrayLiteral: exampleResourceFilePaths.first!),
+                                         dependencies: exampleAppDependancies))
         }
-
+        
         if module.targets.contains(.uiTests) {
-            targets.append(Target(name: "\(module.name)UITests",
-                                  platform: platform,
-                                  product: .uiTests,
-                                  bundleId: "\(reverseOrganizationName).\(module.name)UITests",
-                                  infoPlist: .default,
-                                  sources: ["\(frameworkPath)/UITests/**"],
-                                  resources: ResourceFileElements(resources: testResourceFilePaths),
-                                  dependencies: [.target(name: exampleAppName)]))
+            targets.append(Target.target(name: "\(module.name)UITests",
+                                         destinations: .iOS,
+                                         product: .uiTests,
+                                         bundleId: "\(reverseOrganizationName).\(module.name)UITests",
+                                         infoPlist: .default,
+                                         sources: ["\(frameworkPath)UITests/**"],
+                                         resources: ResourceFileElements(arrayLiteral: testResourceFilePaths.first!),
+                                         dependencies: [.target(name: exampleAppName)]))
         }
-
+        
         if module.targets.contains(.snapshotTests) {
             var dependencies = module.testingDependencies
             dependencies.append(.target(name: module.name))
-            targets.append(Target(name: "\(module.name)SnapshotTests",
-                                  platform: platform,
-                                  product: .unitTests,
-                                  bundleId: "\(reverseOrganizationName).\(module.name)SnapshotTests",
-                                  infoPlist: .default,
-                                  sources: ["\(frameworkPath)/SnapshotTests/**"],
-                                  resources: ResourceFileElements(resources: testResourceFilePaths),
-                                  dependencies: dependencies))
+            targets.append(Target.target(name: "\(module.name)SnapshotTests",
+                                         destinations: .iOS,
+                                         product: .unitTests,
+                                         bundleId: "\(reverseOrganizationName).\(module.name)SnapshotTests",
+                                         infoPlist: .default,
+                                         sources: ["\(frameworkPath)SnapshotTests/**"],
+                                         resources: ResourceFileElements(arrayLiteral: testResourceFilePaths.first!),
+                                         dependencies: dependencies))
         }
         
         return targets
@@ -242,9 +248,9 @@ extension Project {
         
         var targets = [Target]()
         
-        let mainTarget = Target(
+        let mainTarget = Target.target(
             name: name,
-            platform: platform,
+            destinations: .iOS,
             product: .app,
             bundleId: "\(reverseOrganizationName).\(name)",
             infoPlist: makeAppInfoPlist(),
@@ -260,9 +266,9 @@ extension Project {
         targets.append(mainTarget)
         
         if testingTargets.contains(.unitTests) {
-            let testTarget = Target(
+            let testTarget = Target.target(
                 name: "\(name)Tests",
-                platform: platform,
+                destinations: .iOS,
                 product: .unitTests,
                 bundleId: "\(reverseOrganizationName).\(name)Tests",
                 infoPlist: .default,
@@ -277,9 +283,9 @@ extension Project {
         }
         
         if testingTargets.contains(.snapshotTests) {
-            let snapshotTestsTarget = Target(
+            let snapshotTestsTarget = Target.target(
                 name: "\(name)SnapshotTests",
-                platform: platform,
+                destinations: .iOS,
                 product: .unitTests,
                 bundleId: "\(reverseOrganizationName).\(name)SnapshotTests",
                 infoPlist: .default,
@@ -290,11 +296,11 @@ extension Project {
                 ])
             targets.append(snapshotTestsTarget)
         }
-
+        
         if testingTargets.contains(.uiTests) {
-            let uiTestTarget = Target(
+            let uiTestTarget = Target.target(
                 name: "\(name)UITests",
-                platform: platform,
+                destinations: .iOS,
                 product: .uiTests,
                 bundleId: "\(reverseOrganizationName).\(name)UITests",
                 infoPlist: .default,

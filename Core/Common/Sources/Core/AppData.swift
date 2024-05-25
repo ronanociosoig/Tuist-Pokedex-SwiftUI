@@ -26,10 +26,10 @@ public class AppData: AppDataHandling {
     public var pokemon: Pokemon?
     public var pokemons = [LocalPokemon]()
     
-    let storage: Storable
+    // let storage: Storing
     
-    public init(storage: Storable) {
-        self.storage = storage
+    public init() {
+        //self.storage = storage
     }
     
     public func newSpecies() -> Bool {
@@ -47,19 +47,20 @@ public class AppData: AppDataHandling {
     }
     
     public func load() {
-        pokemons = storage.load(AppData.pokemonFile,
+        pokemons = Storage.load(AppData.pokemonFile,
                                 from: directory(),
                                 as: [LocalPokemon].self) ?? [LocalPokemon]()
+        print("pokemons loaded")
     }
     
     public func save() {
-        storage.save(pokemons,
+        Storage.save(pokemons,
                      to: directory(),
                      as: AppData.pokemonFile)
     }
     
     public func clean() {
-        storage.remove(AppData.pokemonFile, from: directory())
+        Storage.remove(AppData.pokemonFile, from: directory())
     }
     
     public func directory() -> Directory {

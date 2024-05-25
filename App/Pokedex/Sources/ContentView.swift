@@ -7,14 +7,15 @@ final class ContentViewModel: ObservableObject {
     
     // These objects should be provided by dependency injection
     let searchService = PokemonSearchService()
-    let dataProvider = DataProvider()
+    let dataProvider: DataProvider
     
     @Published var destination: Destination? {
         didSet { self.bind() }
     }
     
-    init(destination: Destination? = nil) {
+    init(destination: Destination? = nil, dataProvider: DataProvider = DataProvider()) {
         self.destination = destination
+        self.dataProvider = dataProvider
     }
     
     enum Destination {
@@ -29,7 +30,10 @@ final class ContentViewModel: ObservableObject {
     }
     
     func backpackButtonTapped() {
+        // dataProvider.start()
         let backpackViewModel = BackpackViewModel(dataProvider: dataProvider)
+        // let pokemons = dataProvider.pokemons()
+        // print("Do we have them? \(pokemons.count)")
         destination = .backpackScene(backpackViewModel)
     }
     
@@ -40,6 +44,7 @@ final class ContentViewModel: ObservableObject {
                 guard let self else { return }
                 // TODO: save data
                 self.destination = nil
+                // dataProvider.catchPokemon()
             }
             catchViewModel.onCatchDismissed = { [weak self] in
                 guard let self else { return }
@@ -96,6 +101,10 @@ struct ContentView: View {
                content: { $backpackViewModel in
             NavigationStack {
                 BackpackView(model: backpackViewModel)
+                    .navigationBarItems(trailing: Button("Cancel",
+                                                         action: {
+                        backpackViewModel.onCancel()
+                    }))
             }
         })
         .sheet(unwrapping: self.$model.destination,

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class FileStorage {
+struct FileStorage {
     
     fileprivate init() { }
     

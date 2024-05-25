@@ -1,9 +1,9 @@
-import Foundation
 import Combine
-import os.log
-
-import NetworkKit
 import Common
+import Dependencies
+import Foundation
+import NetworkKit
+import os.log
 
 public protocol DataSearchProviding {
     func search(identifier: Int, networkService: SearchService, queue: DispatchQueue)

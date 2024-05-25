@@ -6,12 +6,12 @@
 //  Copyright © 2019 Sonomos. All rights reserved.
 //
 
+import Combine
 import Foundation
 import os.log
-import Combine
 
 public class DataProvider: DataProviding {
-    public var appData: AppDataHandling = AppData(storage: Storage())
+    public var appData: AppDataHandling = AppData()
     public var notifier: Notifier?
     public var searchCancellable: AnyCancellable?
 
@@ -43,8 +43,4 @@ public class DataProvider: DataProviding {
     public func pokemons() -> [LocalPokemon] {
         return appData.pokemons
     }
-    
-//    public static var mock {
-//        
-//    }
 }

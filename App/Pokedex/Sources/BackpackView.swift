@@ -6,10 +6,10 @@
 //  Copyright © 2023 Sonomos.com. All rights reserved.
 //
 
+import Common
 import SwiftUI
 import SwiftUINavigation
 import NukeUI
-import Common
 import XCTestDynamicOverlay
 
 final class BackpackViewModel: ObservableObject {
@@ -68,11 +68,11 @@ struct BackpackView: View {
             .navigationDestination(unwrapping: self.$model.destination, case: /BackpackViewModel.Destination.detail) { $pokemon in
                 DetailView(pokemon: pokemon)
             }
-            .toolbar {
-                Button("Cancel") {
-                    model.onCancel()
-                }
-            }
+//            .toolbar {
+//                Button("Cancel") {
+//                    model.onCancel()
+//                }
+//            }
         }
     }
 }
@@ -108,4 +108,3 @@ extension DataProvider: BackpackDataProviding {
         return appData.pokemons
     }
 }
-

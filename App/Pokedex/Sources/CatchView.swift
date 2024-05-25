@@ -1,7 +1,6 @@
 import SwiftUI
 import SwiftUINavigation
 import XCTestDynamicOverlay
-import NukeUI
 import os.log
 import Common
 import NetworkKit
@@ -27,6 +26,7 @@ final class CatchViewModel: ObservableObject, Notifier {
     
     @Published var destination: Destination?
     @Published var pokemon: ScreenPokemon?
+    @Published var imageURL: URL?
     
     var blockCall: Bool = false
     var dataProvider: CatchDataProviding
@@ -133,6 +133,8 @@ final class CatchViewModel: ObservableObject, Notifier {
     }
     
     func dataReceived(errorMessage: String?, on queue: DispatchQueue?) {
+        
+        
         DispatchQueue.main.async {
             os_log("Data received", log: Log.data, type: .default)
             
@@ -147,6 +149,11 @@ final class CatchViewModel: ObservableObject, Notifier {
                 
             } else {
                 self.pokemon = self.dataProvider.pokemon()
+                
+                if let path = self.pokemon?.iconPath {
+                    self.imageURL = URL(string: path)
+                }
+                
                 self.showAlertForCatching()
             }
         }
@@ -168,19 +175,19 @@ struct CatchView: View {
                     .aspectRatio(contentMode: .fill)
                     .edgesIgnoringSafeArea(.all)
                 VStack {
-                    Spacer().frame(width: 100, height: 200)
-                    if let pokemon = model.pokemon {
-                        Text(pokemon.name)
-                        if let path = pokemon.iconPath, let url = URL(string: path) {
-                            LazyImage(url: url)
-                        } else {
-                            Image("PokemonPlaceholder")
-                        }
-                        
-                    } else {
+                    Spacer().frame(width: 100, height: 70)
+                    Text(model.pokemon?.name.capitalized ?? "")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                    
+                    AsyncImage(url: model.imageURL) { image in
+                        image.resizable()
+                    } placeholder: {
                         Image("PokemonPlaceholder")
                     }
-                    
+                    .frame(width: 200, height: 200)
+
                     HStack{
                         Spacer()
                         Text(model.pokemonHeightString())
@@ -226,6 +233,8 @@ struct CatchView: View {
             self.model.catchErrorButtonTapped()
         }
     }
+    
+    
 }
 
 struct CatchView_Previews: PreviewProvider {
