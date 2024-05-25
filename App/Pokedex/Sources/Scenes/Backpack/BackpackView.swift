@@ -9,42 +9,9 @@
 import Common
 import SwiftUI
 import SwiftUINavigation
-import NukeUI
-import XCTestDynamicOverlay
-
-final class BackpackViewModel: ObservableObject {
-    @Published var destination: Destination?
-    var dataProvider: BackpackDataProviding
-    
-    var pokemons: [LocalPokemon] {
-       // return dataProvider.pokemons().map { convert(pokemon: $0) }
-        dataProvider.pokemons()
-    }
-    
-    var onCancel: () -> Void = unimplemented("BackpackViewModel.onCancel")
-    
-    init(dataProvider: BackpackDataProviding,
-         destination: Destination? = nil) {
-        self.dataProvider = dataProvider
-        self.destination = destination
-    }
-    
-    enum Destination {
-        case detail(LocalPokemon)
-    }
-    
-    func itemSelected(pokemon: LocalPokemon) {
-        self.destination = .detail(pokemon)
-    }
-    
-    func convert(pokemon: LocalPokemon) -> ScreenPokemon {
-        return ScreenPokemon(name: pokemon.name,
-                             weight: pokemon.weight, height: pokemon.height, iconPath: pokemon.spriteUrlString)
-    }
-}
 
 struct BackpackView: View {
-    @ObservedObject var model: BackpackViewModel
+    @ObservedObject var model: BackpackModel
     
     let columns = [
         GridItem(.flexible()),
@@ -65,7 +32,7 @@ struct BackpackView: View {
                     }
                 }
             }
-            .navigationDestination(unwrapping: self.$model.destination, case: /BackpackViewModel.Destination.detail) { $pokemon in
+            .navigationDestination(unwrapping: self.$model.destination, case: /BackpackModel.Destination.detail) { $pokemon in
                 DetailView(pokemon: pokemon)
             }
         }
@@ -78,7 +45,7 @@ struct PokedexItemView: View {
     var body: some View {
         VStack {
             if let imagePath = pokemon.spriteUrlString, let imageURL = URL(string: imagePath) {
-                LazyImage(url: imageURL)
+                AsyncImage(url: imageURL)
             } else {
                 Image("PokemonPlaceholder")
             }
@@ -91,7 +58,7 @@ struct PokedexItemView: View {
 
 struct BackpackView_Previews: PreviewProvider {
     static var previews: some View {
-        BackpackView(model: BackpackViewModel(dataProvider: DataProvider()))
+        BackpackView(model: BackpackModel(dataProvider: DataProvider()))
     }
 }
 

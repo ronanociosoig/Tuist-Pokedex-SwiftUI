@@ -1,13 +1,20 @@
+//
+//  CatchModel.swift
+//  Pokedex
+//
+//  Created by ronan.ociosoig on 25/05/2024.
+//  Copyright © 2024 Sonomos.com. All rights reserved.
+//
+
+import Foundation
 import SwiftUI
 import SwiftUINavigation
-import XCTestDynamicOverlay
-import os.log
 import Common
 import NetworkKit
+import os.log
+import XCTestDynamicOverlay
 
-typealias CatchDataProviding = DataSearchProviding & DataProviding & CatchDataProvider
-
-extension AlertState where Action == CatchViewModel.AlertErrorAction {
+extension AlertState where Action == CatchModel.AlertErrorAction {
     static let confirmError = AlertState(title: TextState(Constants.Translations.CatchScene.noPokemonFoundAlertTitle),
                                          message: nil,
                                          buttons: [
@@ -22,7 +29,7 @@ extension AlertState where Action == CatchViewModel.AlertErrorAction {
     }
 }
 
-final class CatchViewModel: ObservableObject, Notifier {
+final class CatchModel: ObservableObject, Notifier {
     
     @Published var destination: Destination?
     @Published var pokemon: ScreenPokemon?
@@ -157,105 +164,5 @@ final class CatchViewModel: ObservableObject, Notifier {
                 self.showAlertForCatching()
             }
         }
-    }
-}
-
-struct CatchView: View {
-    @ObservedObject var model: CatchViewModel
-    
-    init(model: CatchViewModel) {
-        self.model = model
-    }
-    
-    var body: some View {
-        ZStack {
-            ZStack {
-                Image("Background")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .edgesIgnoringSafeArea(.all)
-                VStack {
-                    Spacer().frame(width: 100, height: 70)
-                    Text(model.pokemon?.name.capitalized ?? "")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                    
-                    AsyncImage(url: model.imageURL) { image in
-                        image.resizable()
-                    } placeholder: {
-                        Image("PokemonPlaceholder")
-                    }
-                    .frame(width: 200, height: 200)
-
-                    HStack{
-                        Spacer()
-                        Text(model.pokemonHeightString())
-                        Spacer().frame(width: 30)
-                        Text(model.pokemonWeightString())
-                        Spacer()
-                    }
-                    
-                    Spacer()
-                }
-                VStack {
-                    Spacer()
-                        .frame(width: 100, height: 400)
-                    Button() {
-                        model.catchButtonTapped()
-                        
-                    } label: {
-                        Image("Ball")
-                            .resizable()
-                            .frame(width: 150, height: 150)
-                    }
-                    Text("Catch it now!")
-                }
-            }
-        }
-        .onAppear {
-            model.searchNextPokemon(identifier: nil)
-        }
-        .alert(
-            unwrapping: self.$model.destination,
-            case: /CatchViewModel.Destination.showCatchAlert
-        ) { action in
-            if action == .catchPokemon {
-                self.model.catchButtonTapped()
-            } else {
-                self.model.cancelButtonTapped()
-            }
-        }
-        .alert(
-            unwrapping: self.$model.destination,
-            case: /CatchViewModel.Destination.showErrorAlert
-        ) { _ in
-            self.model.catchErrorButtonTapped()
-        }
-    }
-    
-    
-}
-
-struct CatchView_Previews: PreviewProvider {
-    static var previews: some View {
-        CatchView(model:
-                    CatchViewModel(searchService: PokemonSearchService(),
-                                   dataProvider: DataProvider()))
-    }
-}
-
-public protocol CatchDataProvider {
-    func pokemon() -> ScreenPokemon?
-    func newSpecies() -> Bool
-}
-
-extension DataProvider: CatchDataProvider {
-    public func pokemon() -> ScreenPokemon? {
-        guard let foundPokemon = appData.pokemon else { return nil }
-        return ScreenPokemon(name: foundPokemon.name,
-                             weight: foundPokemon.weight,
-                             height: foundPokemon.height,
-                             iconPath: foundPokemon.sprites.frontDefault)
     }
 }

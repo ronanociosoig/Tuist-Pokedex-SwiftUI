@@ -5,17 +5,15 @@ import NetworkKit
 
 @main
 struct PokedexApp: App {
-    //let appData: AppData = AppData(storage: Storage())
     let dataProvider = DataProvider()
-    
-    let catchViewModel = CatchViewModel(searchService: PokemonSearchService(),
-                                        dataProvider: DataProvider(),
-                                        destination: nil,
-                                        blockCall: false)
+//    let catchModel = CatchModel(searchService: PokemonSearchService(),
+//                                        dataProvider: DataProvider(),
+//                                        destination: nil,
+//                                        blockCall: false)
     
     var body: some Scene {
         WindowGroup {
-            ContentView(contentViewModel: ContentViewModel(dataProvider: dataProvider))
+            HomeView(model: HomeModel(dataProvider: dataProvider))
                 .task {
                     dataProvider.start()
                 }
