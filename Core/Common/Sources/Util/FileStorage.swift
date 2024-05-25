@@ -38,6 +38,15 @@ struct FileStorage {
         }
     }
     
+    static func store(_ data: Data, to directory: Directory, as fileName: String) {
+        let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
+        do {
+            try data.write(to: url)
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
+    
     /// Store an encodable struct to the specified directory on disk
     ///
     /// - Parameters:
@@ -57,6 +66,15 @@ struct FileStorage {
             fileManager.createFile(atPath: url.path,
                                            contents: data,
                                            attributes: nil)
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
+    
+    static func retrieve(_ fileName: String, from directory: Directory) -> Data {
+        let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
+        do {
+            return try Data(contentsOf: url)
         } catch {
             fatalError(error.localizedDescription)
         }
