@@ -68,11 +68,6 @@ struct BackpackView: View {
             .navigationDestination(unwrapping: self.$model.destination, case: /BackpackViewModel.Destination.detail) { $pokemon in
                 DetailView(pokemon: pokemon)
             }
-//            .toolbar {
-//                Button("Cancel") {
-//                    model.onCancel()
-//                }
-//            }
         }
     }
 }
@@ -88,7 +83,8 @@ struct PokedexItemView: View {
                 Image("PokemonPlaceholder")
             }
             
-            Text(pokemon.name)
+            Text(pokemon.name.capitalized)
+                .foregroundStyle(.black)
         }
     }
 }

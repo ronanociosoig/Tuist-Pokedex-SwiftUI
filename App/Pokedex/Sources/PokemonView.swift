@@ -8,8 +8,6 @@
 
 import SwiftUI
 import Common
-import Nuke
-import NukeUI
 
 final class PokemonViewModel {
     let pokemon: LocalPokemon
@@ -64,9 +62,16 @@ struct PokemonView: View {
     
     var body: some View {
         VStack {
-            Text(model.name)
+            Text(model.name.capitalized)
+                .font(.title)
+                .fontWeight(.bold)
             Spacer().frame(width: 10, height: 80)
-            LazyImage(url: model.imageURL)
+            AsyncImage(url: model.imageURL) { image in
+                image.resizable()
+            } placeholder: {
+                Image("PokemonPlaceholder")
+            }
+            .frame(width: 200, height: 200)
             Spacer().frame(width: 10, height: 40)
             HStack {
                 Spacer()
