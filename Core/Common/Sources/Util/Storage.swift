@@ -13,14 +13,6 @@ public protocol Mocking {
     static var mock: Self { get }
 }
 
-extension Storage: DependencyKey {
-    public static let liveValue = Storage()
-    
-    public static var testValue: Storage {
-        return Storage()
-    }
-}
-
 public enum Directory {
     case documents
     case caches
@@ -36,42 +28,45 @@ public protocol Storing {
     static func save(_ data: Data, to directory: Directory, as fileName: String)
 }
 
-struct StorageUnit {
+struct StorageClient {
     var load: @Sendable (_ fileName: String, _ directory: Directory) -> Data?
     var save: @Sendable (_ data: Data, _ fileName: String, _ directory: Directory) throws -> Void
+    var clear: @Sendable (_ fileName: String, _ directory: Directory) -> Void
 }
 
 // It isn't possible to use generics on computed properties
-extension StorageUnit: DependencyKey {
-    static var liveValue = StorageUnit(
+extension StorageClient: DependencyKey {
+    static var liveValue = StorageClient(
         load: { fileName, directory in
             Storage.load(fileName, from: directory)
         },
         save: { object, fileName, directory in
             Storage.save(object, to: directory, as: fileName)
+        },
+        clear: { fileName, directory in
+            Storage.remove(fileName, from: directory)
         }
     )
     
-    static var testValue = StorageUnit(
+    static var testValue = StorageClient(
         load: { fileName, directory in
             return Data()
         },
         save: { object, fileName, directory in
+        },
+        clear: { fileName, directory in
         }
     )
 }
 
 extension DependencyValues {
-    var storageUnit: StorageUnit {
-        get { self[StorageUnit.self] }
-        set { self[StorageUnit.self] = newValue }
+    var storageClient: StorageClient {
+        get { self[StorageClient.self] }
+        set { self[StorageClient.self] = newValue }
     }
 }
 
 public struct Storage: Storing {
-    public init() {
-        
-    }
     public static func load(_ fileName: String, from directory: Directory) -> Data {
         FileStorage.retrieve(fileName, from: directoryAdaptor(directory: directory))
     }

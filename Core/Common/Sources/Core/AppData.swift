@@ -27,7 +27,7 @@ public class AppData: AppDataHandling {
     public var pokemon: Pokemon?
     public var pokemons = [LocalPokemon]()
 
-    @Dependency(\.storageUnit) var storageUnit
+    @Dependency(\.storageClient) var storageClient
     
     public init() {
         
@@ -48,12 +48,12 @@ public class AppData: AppDataHandling {
     }
     
     public func load() {
-        if let data = storageUnit.load(AppData.pokemonFile, directory()) {
+        if let data = storageClient.load(AppData.pokemonFile, directory()) {
             let decoder = JSONDecoder()
             do {
                 pokemons = try decoder.decode([LocalPokemon].self, from: data)
             } catch {
-                fatalError("Failed to parse LocalPokemon objects from data")
+                fatalError("Failed to decode LocalPokemon array from storage.")
             }
         }
     }
@@ -62,13 +62,14 @@ public class AppData: AppDataHandling {
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(pokemons)
-            try storageUnit.save(data, AppData.pokemonFile, directory())
+            try storageClient.save(data, AppData.pokemonFile, directory())
         } catch {
             fatalError("Failed to save pokemons")
         }
     }
     
     public func clean() {
+        storageClient.clear(AppData.pokemonFile, directory())
         // storageType.remove(AppData.pokemonFile, from: directory())
     }
     
