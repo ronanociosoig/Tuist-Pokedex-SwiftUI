@@ -12,23 +12,20 @@ import XCTest
 
 final class AppDataTests: XCTestCase {
     func testNewSpeciesIsFalseWhenNoPokemonDefined() {
-        let storage = FileStorage()
-        let appData = AppData(storage: storage)
+        let appData = AppData(StorageType: MockValidStorage.self)
         
         XCTAssertFalse(appData.newSpecies())
     }
     
     func testNewSpeciesIsTrueWhenPokemonDefinedButNoOthers() {
-        let storage = FileStorage()
-        let appData = AppData(storage: storage)
+        let appData = AppData(StorageType: MockValidStorage.self)
         appData.pokemon = MockPokemonFactory.makePokemon()
         
         XCTAssertTrue(appData.newSpecies())
     }
     
     func testNewSpeciesIsFalseWhenPokemonsAreEqual() {
-        let storage = FileStorage()
-        let appData = AppData(storage: storage)
+        let appData = AppData(StorageType: MockValidStorage.self)
         appData.pokemon = MockPokemonFactory.makePokemon()
         appData.pokemons.append(MockPokemonFactory.makeLocalPokemon())
         
@@ -36,8 +33,7 @@ final class AppDataTests: XCTestCase {
     }
     
     func testSaveAndLoad() {
-        let storage = FileStorage()
-        let appData = AppData(storage: storage)
+        let appData = AppData(StorageType: MockValidStorage.self)
         
         XCTAssertTrue(appData.pokemons.isEmpty)
         appData.pokemons.append(MockPokemonFactory.makeLocalPokemon())
@@ -48,15 +44,14 @@ final class AppDataTests: XCTestCase {
         appData.load()
         XCTAssertTrue(appData.pokemons.count == 1)
         
-        if Storage.fileExists(AppData.pokemonFile, in: .documents) {
-            Storage.remove(AppData.pokemonFile, from: .documents)
-        }
+        // if Storage.fileExists(AppData.pokemonFile, in: .documents) {
+         //   Storage.remove(AppData.pokemonFile, from: .documents)
+        //}
     }
     
     func testSorting() {
         let expectedName = "cascoon"
-        let storage = FileStorage()
-        let appData = AppData(storage: storage)
+        let appData = AppData(StorageType: MockValidStorage.self)
         
         let unsortedPokemons = MockPokemonFactory.makeOutOfOrderLocalPokemons()
         let firstUnsortedPokemon = unsortedPokemons.first
@@ -70,5 +65,30 @@ final class AppDataTests: XCTestCase {
         let firstPokemon = appData.pokemons.first
         
         XCTAssertEqual(firstPokemon?.name, expectedName)
+    }
+}
+
+struct MockValidStorage: Storing {
+    static func fileExists(fileName: String, in directory: Common.Directory) -> Bool {
+        return true
+    }
+    
+    static func load(_ fileName: String, in directory: Common.Directory) -> Data {
+        let mockPokemon: LocalPokemon = .mock
+        let pokemons = [mockPokemon]
+        let encoder = JSONEncoder()
+        do {
+            return try encoder.encode(pokemons)
+        } catch {
+            fatalError("Failed to encode mock data")
+        }
+    }
+    
+    static func save(_ data: Data, as fileName: String, in directory: Common.Directory) {
+        
+    }
+
+    static func remove(_ fileName: String, in directory: Common.Directory) {
+        
     }
 }

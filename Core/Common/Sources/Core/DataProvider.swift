@@ -11,7 +11,7 @@ import Foundation
 import os.log
 
 public class DataProvider: DataProviding {
-    public var appData: AppDataHandling = AppData()
+    public var appData: AppDataHandling = AppData(StorageType: Storage.self)
     public var notifier: Notifier?
     public var searchCancellable: AnyCancellable?
 

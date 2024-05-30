@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Dependencies
 
 public protocol AppDataHandling {
     var pokemon: Pokemon? { get set }
@@ -27,10 +26,10 @@ public class AppData: AppDataHandling {
     public var pokemon: Pokemon?
     public var pokemons = [LocalPokemon]()
 
-    @Dependency(\.storageClient) var storageClient
+    let LocalStorage: Storing.Type
     
-    public init() {
-        
+    public init(LocalStorage: Storing.Type) {
+        self.LocalStorage = LocalStorage
     }
     
     public func newSpecies() -> Bool {
@@ -48,13 +47,12 @@ public class AppData: AppDataHandling {
     }
     
     public func load() {
-        if let data = storageClient.load(AppData.pokemonFile, directory()) {
-            let decoder = JSONDecoder()
-            do {
-                pokemons = try decoder.decode([LocalPokemon].self, from: data)
-            } catch {
-                fatalError("Failed to decode LocalPokemon array from storage.")
-            }
+        let data = LocalStorage.load(AppData.pokemonFile, in: directory())
+        let decoder = JSONDecoder()
+        do {
+            pokemons = try decoder.decode([LocalPokemon].self, from: data)
+        } catch {
+            fatalError("Failed to decode LocalPokemon array from storage.")
         }
     }
     
@@ -62,15 +60,14 @@ public class AppData: AppDataHandling {
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(pokemons)
-            try storageClient.save(data, AppData.pokemonFile, directory())
+            LocalStorage.save(data, as: AppData.pokemonFile, in: directory())
         } catch {
             fatalError("Failed to save pokemons")
         }
     }
     
     public func clean() {
-        storageClient.clear(AppData.pokemonFile, directory())
-        // storageType.remove(AppData.pokemonFile, from: directory())
+        LocalStorage.remove(AppData.pokemonFile, in: directory())
     }
     
     public func directory() -> Directory {

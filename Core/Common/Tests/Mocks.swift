@@ -49,46 +49,14 @@ class MockAppData: AppDataHandling {
     }
 }
 
-class MockCoordinator: Coordinating {
-    var window: UIWindow
-    
-    var showPokemonDetailSceneCalled = false
-    
-    var dataProvider: Common.DataProvider?
-    
-    init() {
-        window = UIWindow(frame: UIScreen.main.bounds)
-    }
-    
-    func start() {
-        
-    }
-    
-    func showLoading() {
-        
-    }
-    
-    func dismissLoading() {
-        
-    }
-    
-    func showHomeScene() {
-        
-    }
-    
-    func showCatchScene(identifier: Int?) {
-        
-    }
-    
-    func showBackpackScene() {
-        
-    }
-    
-    func showPokemonDetailScene(pokemon: Common.LocalPokemon) {
-        showPokemonDetailSceneCalled = true
-    }
-    
-    func showAlert(with errorMessage: String) {
-        
-    }
+extension LocalPokemon {
+    static let mock = Self(name: "charmeleon",
+                     weight: 190,
+                     height: 11,
+                     order: 6,
+                     spriteUrlString: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/5.png",
+                     date: Date(),
+                     species: "charmeleon",
+                     baseExperience: 142,
+                     types: ["fire"])
 }

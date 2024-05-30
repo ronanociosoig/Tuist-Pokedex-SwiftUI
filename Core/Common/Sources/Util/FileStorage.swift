@@ -38,7 +38,7 @@ struct FileStorage {
         }
     }
     
-    static func store(_ data: Data, to directory: Directory, as fileName: String) {
+    static func store(_ data: Data, as fileName: String, in directory: Directory) {
         let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
         do {
             try data.write(to: url)
@@ -53,7 +53,7 @@ struct FileStorage {
     ///   - object: the encodable struct to store
     ///   - directory: where to store the struct
     ///   - fileName: what to name the file where the struct data will be stored
-    static func store<T: Encodable>(_ object: T, to directory: Directory, as fileName: String) {
+    static func store<T: Encodable>(_ object: T, in directory: Directory, as fileName: String) {
         let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
         
         let encoder = JSONEncoder()
@@ -71,7 +71,7 @@ struct FileStorage {
         }
     }
     
-    static func retrieve(_ fileName: String, from directory: Directory) -> Data {
+    static func retrieve(_ fileName: String, in directory: Directory) -> Data {
         let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
         do {
             return try Data(contentsOf: url)
@@ -87,7 +87,7 @@ struct FileStorage {
     ///   - directory: directory where struct data is stored
     ///   - type: struct type (i.e. Message.self)
     /// - Returns: decoded struct model(s) of data
-    static func retrieve<T: Decodable>(_ fileName: String, from directory: Directory, as type: T.Type) -> T {
+    static func retrieve<T: Decodable>(_ fileName: String, in directory: Directory, as type: T.Type) -> T {
         let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
         let fileManager = FileManager.default
         
@@ -98,8 +98,7 @@ struct FileStorage {
         if let data = fileManager.contents(atPath: url.path) {
             let decoder = JSONDecoder()
             do {
-                let model = try decoder.decode(type, from: data)
-                return model
+                return try decoder.decode(type, from: data)
             } catch {
                 fatalError(error.localizedDescription)
             }
@@ -123,7 +122,7 @@ struct FileStorage {
     }
     
     /// Remove specified file from specified directory
-    static func remove(_ fileName: String, from directory: Directory) {
+    static func remove(_ fileName: String, in directory: Directory) {
         let url = getURL(for: directory).appendingPathComponent(fileName, isDirectory: false)
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: url.path) {

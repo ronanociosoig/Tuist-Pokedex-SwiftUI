@@ -19,13 +19,13 @@ struct StorageClient {
 extension StorageClient: DependencyKey {
     static var liveValue = StorageClient(
         load: { fileName, directory in
-            Storage.load(fileName, from: directory)
+            Storage.load(fileName, in: directory)
         },
         save: { object, fileName, directory in
-            Storage.save(object, to: directory, as: fileName)
+            Storage.save(object,  as: fileName, in: directory)
         },
         clear: { fileName, directory in
-            Storage.remove(fileName, from: directory)
+            Storage.remove(fileName, in: directory)
         }
     )
     

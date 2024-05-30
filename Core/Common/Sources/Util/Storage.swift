@@ -19,29 +19,29 @@ public enum Directory {
 
 public protocol Storing {
     static func fileExists(fileName: String, in directory: Directory) -> Bool
-    static func load(_ fileName: String, from directory: Directory) -> Data
-    static func load<T: Decodable>(_ fileName: String, from directory: Directory, as type: T.Type) -> T?
-    static func save(_ data: Data, to directory: Directory, as fileName: String)
-    static func save<T: Encodable>(_ object: T, to directory: Directory, as fileName: String)
-    static func remove(_ fileName: String, from directory: Directory)
+    static func load(_ fileName: String, in directory: Directory) -> Data
+    // static func load<T: Decodable>(_ fileName: String, in directory: Directory, as type: T.Type) -> T?
+    static func save(_ data: Data, as fileName: String, in directory: Directory)
+    // static func save<T: Encodable>(_ object: T, as fileName: String, in directory: Directory)
+    static func remove(_ fileName: String, in directory: Directory)
 }
 
 public struct Storage: Storing {
-    public static func load(_ fileName: String, from directory: Directory) -> Data {
-        FileStorage.retrieve(fileName, from: directoryAdaptor(directory: directory))
+    public static func load(_ fileName: String, in directory: Directory) -> Data {
+        FileStorage.retrieve(fileName, in: directoryAdaptor(directory: directory))
     }
     
-    public static func save(_ data: Data, to directory: Directory, as fileName: String) {
-        FileStorage.store(data, to: directoryAdaptor(directory: directory), as: fileName)
+    public static func save(_ data: Data, as fileName: String, in directory: Directory) {
+        FileStorage.store(data, in: directoryAdaptor(directory: directory), as: fileName)
     }
     
-    public static func save<T>(_ object: T, to directory: Directory, as fileName: String) where T: Encodable {
-        FileStorage.store(object, to: directoryAdaptor(directory: directory), as: fileName)
+    public static func save<T>(_ object: T, as fileName: String, in directory: Directory) where T: Encodable {
+        FileStorage.store(object as! Data, as: fileName, in: directoryAdaptor(directory: directory))
     }
     
-    public static func load<T>(_ fileName: String, from directory: Directory, as type: T.Type) -> T? where T: Decodable {
+    public static func load<T>(_ fileName: String, in directory: Directory, as type: T.Type) -> T? where T: Decodable {
         if fileExists(fileName: fileName, in: directory) {
-            return FileStorage.retrieve(fileName, from: directoryAdaptor(directory: directory), as: T.self)
+            return FileStorage.retrieve(fileName, in: directoryAdaptor(directory: directory), as: T.self)
         }
         
         return nil
@@ -51,8 +51,8 @@ public struct Storage: Storing {
         return FileStorage.fileExists(fileName, in: directoryAdaptor(directory: directory))
     }
     
-    public static func remove(_ fileName: String, from directory: Directory) {
-        FileStorage.remove(fileName, from: directoryAdaptor(directory: directory))
+    public static func remove(_ fileName: String, in directory: Directory) {
+        FileStorage.remove(fileName, in: directoryAdaptor(directory: directory))
     }
     
     private static func directoryAdaptor(directory: Directory) -> FileStorage.Directory {
@@ -64,3 +64,4 @@ public struct Storage: Storing {
         }
     }
 }
+
