@@ -53,7 +53,7 @@ public class AppData: AppDataHandling {
             do {
                 pokemons = try decoder.decode([LocalPokemon].self, from: data)
             } catch {
-                fatalError("Failed to decode LocalPokemon array from storage.")
+                
             }
         }
     }

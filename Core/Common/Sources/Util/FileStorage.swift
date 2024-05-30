@@ -76,7 +76,7 @@ struct FileStorage {
         do {
             return try Data(contentsOf: url)
         } catch {
-            fatalError(error.localizedDescription)
+            return Data()
         }
     }
     
