@@ -191,15 +191,48 @@ extension Project {
         }
         
         if module.targets.contains(.unitTests) {
+            targets.append(Target.target(
+                name: "\(module.name)Tests",
+                destinations: .iOS,
+                product: .unitTests,
+                bundleId: "\(reverseOrganizationName).\(module.name)Tests",
+                           infoPlist: .default,
+                           sources: ["\(frameworkPath)Tests/**"]
+            ))
             
-            targets.append(Target.target(name: "\(module.name)Tests",
-                                         destinations: .iOS,
-                                         product: .unitTests,
-                                         bundleId: "\(reverseOrganizationName).\(module.name)Tests",
-                                         infoPlist: .default,
-                                         sources: ["\(frameworkPath)Tests/**"],
-                                         resources: ResourceFileElements(arrayLiteral: testResourceFilePaths.first!),
-                                         dependencies: [.target(name: module.name)]))
+//            Target.target(name: <#T##String#>,
+//                          destinations: <#T##Destinations#>,
+//                          product: <#T##Product#>,
+//                          productName: <#T##String?#>,
+//                          bundleId: <#T##String#>,
+//                          deploymentTargets: <#T##DeploymentTargets?#>,
+//                          infoPlist: <#T##InfoPlist?#>,
+//                          sources: <#T##SourceFilesList?#>,
+//                          resources: <#T##ResourceFileElements?#>,
+//                          copyFiles: <#T##[CopyFilesAction]?#>,
+//                          headers: <#T##Headers?#>,
+//                          entitlements: <#T##Entitlements?#>,
+//                          scripts: <#T##[TargetScript]#>,
+//                          dependencies: <#T##[TargetDependency]#>,
+//                          settings: <#T##Settings?#>,
+//                          coreDataModels: <#T##[CoreDataModel]#>,
+//                          environmentVariables: <#T##[String : EnvironmentVariable]#>,
+//                          launchArguments: <#T##[LaunchArgument]#>,
+//                          additionalFiles: <#T##[FileElement]#>,
+//                          buildRules: <#T##[BuildRule]#>,
+//                          mergedBinaryType: <#T##MergedBinaryType#>,
+//                          mergeable: <#T##Bool#>,
+//                          onDemandResourcesTags: <#T##OnDemandResourcesTags?#>)
+            
+            
+//            targets.append(Target.target(name: "\(module.name)Tests",
+//                                         destinations: .iOS,
+//                                         product: .unitTests,
+//                                         bundleId: "\(reverseOrganizationName).\(module.name)Tests",
+//                                         infoPlist: .default,
+//                                         sources: ["\(frameworkPath)Tests/**"],
+//                                         resources: ResourceFileElements(arrayLiteral: testResourceFilePaths.first!),
+//                                         dependencies: [.target(name: module.name)]))
         }
         
         if module.targets.contains(.exampleApp) {

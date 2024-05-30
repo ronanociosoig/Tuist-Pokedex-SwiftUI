@@ -9,7 +9,7 @@ let localHelper = LocalHelper(name: "MyPlugin")
 let project = Project.app(name: "Pokedex",
                           organizationName: "Sonomos.com",
                           platform: .iOS,
-                          externalDependencies: ["SwiftUINavigation", "Dependencies", "DependenciesMacros"],
+                          externalDependencies: ["SwiftUINavigation", "Dependencies"],
                           targetDependancies: [],
                           testingDependancies: [.external(name: "SnapshotTesting")],
                           moduleTargets: [makeHomeModule(),
@@ -34,7 +34,7 @@ func makeHomeModule() -> Module {
                   frameworkResources: ["Resources/**"],
                   exampleResources: ["Resources/**"],
                   testResources: [],
-                  targets: [.framework])
+                  targets: [.framework, .unitTests])
 }
 
 func makeBackpackModule() -> Module {
@@ -82,13 +82,13 @@ func makeCommonModule() -> Module {
     return Module(name: "Common",
                   moduleType: .core,
                   path: "Common",
-                  frameworkDependancies: [],
+                  frameworkDependancies: [.external(name: "Dependencies")],
                   exampleDependencies: [],
                   testingDependencies: [],
                   frameworkResources: [],
                   exampleResources: ["Resources/**"],
                   testResources: [],
-                  targets: [.framework])
+                  targets: [.framework, .unitTests])
 }
 
 func makeUIComponentsModule() -> Module {
