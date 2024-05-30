@@ -1,6 +1,6 @@
 import ProjectDescription
 
-let reverseOrganizationName = "com.sonomos"
+let reverseOrganizationName = "com.edreams"
 let featuresPath = "Features"
 let corePath = "Core"
 let appPath = "App"

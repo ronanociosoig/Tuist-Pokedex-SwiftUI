@@ -7,7 +7,7 @@ let localHelper = LocalHelper(name: "MyPlugin")
 
 // Project
 let project = Project.app(name: "Pokedex",
-                          organizationName: "Sonomos.com",
+                          organizationName: "eDreams.com",
                           platform: .iOS,
                           externalDependencies: ["SwiftUINavigation", "Dependencies"],
                           targetDependancies: [],
